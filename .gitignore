@@ -1,7 +1,6 @@
 __pycache__/
 output/
 test_output/
-*.mp3
 *.mp4
 *.wav
 *.onnx

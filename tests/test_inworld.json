@@ -1,0 +1,77 @@
+[
+  {
+    "word": "This",
+    "start": 0,
+    "end": 0.27
+  },
+  {
+    "word": "is",
+    "start": 0.27,
+    "end": 0.42
+  },
+  {
+    "word": "a",
+    "start": 0.42,
+    "end": 0.49
+  },
+  {
+    "word": "dramatic",
+    "start": 0.49,
+    "end": 1.13
+  },
+  {
+    "word": "test",
+    "start": 1.13,
+    "end": 1.66
+  },
+  {
+    "word": "of",
+    "start": 1.66,
+    "end": 1.92
+  },
+  {
+    "word": "the",
+    "start": 1.92,
+    "end": 2.02
+  },
+  {
+    "word": "new",
+    "start": 2.02,
+    "end": 2.5
+  },
+  {
+    "word": "Inworld",
+    "start": 2.53,
+    "end": 3.1
+  },
+  {
+    "word": "AI",
+    "start": 3.1,
+    "end": 3.57
+  },
+  {
+    "word": "text",
+    "start": 3.57,
+    "end": 3.99
+  },
+  {
+    "word": "to",
+    "start": 3.99,
+    "end": 4.06
+  },
+  {
+    "word": "speech",
+    "start": 4.06,
+    "end": 4.45
+  },
+  {
+    "word": "system",
+    "start": 4.45,
+    "end": 4.98
+  },
+  {
+    "word": ".",
+    "start": 4.98,
+    "end": 5.5
+  }
+]

@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Video Studio — Automated Content Engine</title>
+  <meta name="description" content="Premium AI-powered YouTube Shorts generation studio. Auto-generate viral videos from stories." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css?v=7" />
+</head>
+<body>
+
+  <!-- Animated Background -->
+  <div class="bg-canvas">
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Floating Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.9L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="logo-text-wrap">
+          <span class="logo-text">AI Video Studio</span>
+          <span class="logo-badge">
+            <span class="badge-dot"></span>
+            LIVE
+          </span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-btn active" data-tab="studio" id="nav-studio">
+          <span class="nav-icon">⚡</span> Studio
+        </button>
+        <button class="nav-btn" data-tab="gallery" id="nav-gallery">
+          <span class="nav-icon">🎞</span> Gallery
+        </button>
+        <button class="nav-btn" data-tab="credits" id="nav-credits">
+          <span class="nav-icon">📊</span> Credits
+        </button>
+        <button class="nav-btn" data-tab="settings" id="nav-settings">
+          <span class="nav-icon">⚙️</span> Settings
+        </button>
+      </nav>
+
+      <div class="header-status" id="header-status">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-label">Connecting...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main">
+
+    <!-- ══════════ STUDIO TAB ══════════ -->
+    <section class="tab-content active" id="tab-studio">
+
+      <!-- Hero Banner -->
+      <div class="hero">
+        <div class="hero-eyebrow">🚀 Automated Content Engine</div>
+        <h1 class="hero-title">Generate Viral<br><span class="gradient-text">AI-Powered Shorts</span></h1>
+        <p class="hero-sub">Craft emotional love stories, generate voiceovers, and produce ready-to-upload videos — all in one click.</p>
+      </div>
+
+      <!-- YouTube Pre-Flight Verification & Destination Banner -->
+      <div class="yt-status-bar" id="yt-status-bar">
+        <div class="yt-status-left">
+          <span class="yt-status-dot connected" id="yt-status-dot"></span>
+          <div>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <span class="yt-status-title" id="yt-status-title">YouTube Verified & Connected</span>
+              <span id="yt-destination-badge" class="yt-dest-pill verified">✅ Destination: YouTube (Private Draft)</span>
+            </div>
+            <span class="yt-status-sub" id="yt-status-sub">Channel authenticated. All generated videos WILL automatically upload to YouTube as Private Drafts.</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button id="btn-recheck-yt" class="btn-recheck-yt" title="Verify YouTube connection">↻ Check Connection Now</button>
+        </div>
+      </div>
+
+      <!-- Background Music Selection Engine -->
+      <div class="music-control-panel" id="music-control-panel">
+        <div class="music-panel-header">
+          <div class="music-panel-title-wrap">
+            <span class="music-panel-icon">🎵</span>
+            <div>
+              <div class="music-panel-title">
+                Soundtrack & Music Library
+                <span class="music-badge" id="music-badge-count">22 Tracks Available</span>
+              </div>
+              <p class="music-panel-sub">
+                Now using <strong>all 22 royalty-free musical tracks</strong>. Continuous library rotation ensures every track is utilized across your videos, blending and crossfading multiple tracks dynamically.
+              </p>
+            </div>
+          </div>
+          <div class="music-select-wrap">
+            <label for="music-preference-select" class="music-label">Soundtrack Selection:</label>
+            <select id="music-preference-select" class="music-select">
+              <option value="all" selected>🔀 Auto-Rotate & Multi-Track Blend (All 22 Tracks)</option>
+              <option value="mood">🎭 Smart Mood-Matched (Crime / Romance / History / Geography / Fun)</option>
+              <optgroup label="── Specific Tracks (22 In Library) ──" id="music-individual-options">
+                <!-- Dynamically loaded from /api/music -->
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <div class="music-preview-bar">
+          <div class="music-preview-status" id="music-active-status">
+            <span>Active Mode:</span>
+            <strong id="music-mode-text">🔀 Auto-Rotate & Blend Across All 22 Tracks</strong>
+            <span style="color: var(--text-dim);">• Multi-track crossfade enabled for longer videos</span>
+          </div>
+          <button type="button" class="music-chips-toggle" id="btn-toggle-chips">View 22 Tracks ▾</button>
+        </div>
+
+        <div class="music-track-chips" id="music-track-chips" style="display: none;">
+          <!-- Dynamically populated chips -->
+        </div>
+      </div>
+
+      <!-- Generate Controls -->
+      <div class="gen-grid">
+
+        <!-- Auto Generate -->
+        <div class="gen-card gen-card--auto">
+          <div class="gen-card-glow"></div>
+          <div class="gen-card-content">
+            <div class="card-dest-tag">
+              <span class="card-dest-tag-dot"></span> Upload Destination: <strong>YouTube (Private Draft)</strong>
+            </div>
+            <div class="gen-card-icon">✨</div>
+            <h3 class="gen-card-title">Random Story</h3>
+            <p class="gen-card-desc">Let the AI pick a random niche and craft a complete emotional story from scratch. Automatically uploads to your YouTube channel as a Private Draft.</p>
+            <button id="btn-auto-gen" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+              <span class="btn-icon-wrap">✨</span>
+              Auto-Generate Video
+              <span class="btn-arrow">→</span>
+            </button>
+            <div class="status-msg" id="status-auto-gen"></div>
+          </div>
+        </div>
+
+        <!-- Manual Generate -->
+        <div class="gen-card gen-card--manual">
+          <div class="gen-card-glow"></div>
+          <div class="gen-card-content">
+            <div class="card-dest-tag">
+              <span class="card-dest-tag-dot"></span> Upload Destination: <strong>YouTube (Private Draft)</strong>
+            </div>
+            <div class="gen-card-icon">🎬</div>
+            <h3 class="gen-card-title">Custom Story</h3>
+            <p class="gen-card-desc">Paste your own story, script idea, or topic. The AI will produce a full video and automatically upload to YouTube as a Private Draft.</p>
+            <textarea id="input-manual-story" class="story-input" placeholder="Once upon a time, two lovers were separated by war..."></textarea>
+            <button id="btn-manual-gen" class="btn-primary" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);">
+              <span class="btn-icon-wrap">🎬</span>
+              Generate from Story
+              <span class="btn-arrow">→</span>
+            </button>
+            <div class="status-msg" id="status-manual-gen"></div>
+          </div>
+        </div>
+
+        <!-- Wikipedia Generate: True Crime -->
+        <div class="gen-card gen-card--wiki" style="border-color: #ef4444; background: linear-gradient(180deg, rgba(239, 68, 68, 0.05) 0%, transparent 100%);">
+          <div class="gen-card-glow" style="background: radial-gradient(circle at top right, rgba(239,68,68,0.15), transparent 70%);"></div>
+          <div class="gen-card-content">
+            <div class="card-dest-tag">
+              <span class="card-dest-tag-dot"></span> Upload Destination: <strong>YouTube (Private Draft)</strong>
+            </div>
+            <div class="gen-card-icon" style="background: linear-gradient(135deg, #ef4444, #f97316);">🔍</div>
+            <h3 class="gen-card-title">True Crime Auto-Gen</h3>
+            <p class="gen-card-desc">Fetches an unsolved mystery from Wikipedia, adapts it into a thrilling video, and uploads directly to YouTube.</p>
+            <button id="btn-wiki-truecrime" class="btn-primary btn-glow-red" style="background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);" data-topic="true_crime">
+              <span class="btn-icon-wrap">🔍</span> Generate Crime
+            </button>
+            <div class="status-msg" id="status-wiki-truecrime"></div>
+          </div>
+        </div>
+
+        <!-- Wikipedia Generate: History -->
+        <div class="gen-card gen-card--wiki" style="border-color: #eab308; background: linear-gradient(180deg, rgba(234, 179, 8, 0.05) 0%, transparent 100%);">
+          <div class="gen-card-glow" style="background: radial-gradient(circle at top right, rgba(234, 179, 8, 0.15), transparent 70%);"></div>
+          <div class="gen-card-content">
+            <div class="card-dest-tag">
+              <span class="card-dest-tag-dot"></span> Upload Destination: <strong>YouTube (Private Draft)</strong>
+            </div>
+            <div class="gen-card-icon" style="background: linear-gradient(135deg, #eab308, #ca8a04);">📜</div>
+            <h3 class="gen-card-title">History Explainer</h3>
+            <p class="gen-card-desc">Fetches a fascinating historical event from Wikipedia to create an educational video, uploaded to YouTube as a Private Draft.</p>
+            <button id="btn-wiki-history" class="btn-primary" style="background: linear-gradient(135deg, #eab308, #ca8a04); box-shadow: 0 4px 15px rgba(234, 179, 8, 0.3);" data-topic="history">
+              <span class="btn-icon-wrap">📜</span> Generate History
+            </button>
+            <div class="status-msg" id="status-wiki-history"></div>
+          </div>
+        </div>
+
+        <!-- Wikipedia Generate: Geography -->
+        <div class="gen-card gen-card--wiki" style="border-color: #22c55e; background: linear-gradient(180deg, rgba(34, 197, 94, 0.05) 0%, transparent 100%);">
+          <div class="gen-card-glow" style="background: radial-gradient(circle at top right, rgba(34, 197, 94, 0.15), transparent 70%);"></div>
+          <div class="gen-card-content">
+            <div class="card-dest-tag">
+              <span class="card-dest-tag-dot"></span> Upload Destination: <strong>YouTube (Private Draft)</strong>
+            </div>
+            <div class="gen-card-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">🌍</div>
+            <h3 class="gen-card-title">Geography & Culture</h3>
+            <p class="gen-card-desc">Showcases incredible locations and cultural heritage from around the world, uploaded automatically to YouTube.</p>
+            <button id="btn-wiki-geography" class="btn-primary" style="background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);" data-topic="geography">
+              <span class="btn-icon-wrap">🌍</span> Generate Geography
+            </button>
+            <div class="status-msg" id="status-wiki-geography"></div>
+          </div>
+        </div>
+
+        <!-- Wikipedia Generate: Love -->
+        <div class="gen-card gen-card--wiki" style="border-color: #ec4899; background: linear-gradient(180deg, rgba(236, 72, 153, 0.05) 0%, transparent 100%);">
+          <div class="gen-card-glow" style="background: radial-gradient(circle at top right, rgba(236, 72, 153, 0.15), transparent 70%);"></div>
+          <div class="gen-card-content">
+            <div class="card-dest-tag">
+              <span class="card-dest-tag-dot"></span> Upload Destination: <strong>YouTube (Private Draft)</strong>
+            </div>
+            <div class="gen-card-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">❤️</div>
+            <h3 class="gen-card-title">True Love Auto-Gen</h3>
+            <p class="gen-card-desc">Finds real historical couples and heartwarming relationship stories to create an emotional video uploaded as a Private Draft.</p>
+            <button id="btn-wiki-love" class="btn-primary" style="background: linear-gradient(135deg, #ec4899, #db2777); box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);" data-topic="love">
+              <span class="btn-icon-wrap">❤️</span> Generate Love Story
+            </button>
+            <div class="status-msg" id="status-wiki-love"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Script Preview (hidden until generated) -->
+      <div class="script-preview-card" id="script-box" style="display:none;">
+        <div class="sp-header">
+          <span class="sp-badge">📝 Generated Script</span>
+          <span class="sp-badge-right">AI Output</span>
+        </div>
+        <h3 id="script-title-display" class="sp-title"></h3>
+        <p id="script-desc-display" class="sp-desc"></p>
+        <div id="script-scenes-display" class="sp-scenes"></div>
+      </div>
+
+      <!-- Pipeline Card -->
+      <div class="pipeline-card" id="progress-card">
+        <div class="pipeline-card-header">
+          <div class="pipeline-card-title">
+            <span class="pipeline-icon">⚡</span>
+            Generation Pipeline
+          </div>
+          <div class="pipeline-badge" id="pipeline-status-badge">Idle</div>
+        </div>
+
+        <div class="pipeline-steps">
+          <div class="ps-step" id="step-1" data-step="1">
+            <div class="ps-step-left">
+              <div class="ps-circle"><span>1</span></div>
+              <div class="ps-line"></div>
+            </div>
+            <div class="ps-info">
+              <div class="ps-name">YouTube Pre-Flight Check</div>
+              <div class="ps-desc">Verifies channel authentication & confirms destination (YouTube Private Draft)</div>
+            </div>
+            <div class="ps-status-icon" id="step-1-icon"></div>
+          </div>
+          <div class="ps-step" id="step-2" data-step="2">
+            <div class="ps-step-left">
+              <div class="ps-circle"><span>2</span></div>
+              <div class="ps-line"></div>
+            </div>
+            <div class="ps-info">
+              <div class="ps-name">Script Writing</div>
+              <div class="ps-desc">AI crafts scenes, narration & metadata</div>
+            </div>
+            <div class="ps-status-icon" id="step-2-icon"></div>
+          </div>
+          <div class="ps-step" id="step-3" data-step="3">
+            <div class="ps-step-left">
+              <div class="ps-circle"><span>3</span></div>
+              <div class="ps-line"></div>
+            </div>
+            <div class="ps-info">
+              <div class="ps-name">Voiceover Generation</div>
+              <div class="ps-desc">Neural TTS synthesizes narration audio</div>
+            </div>
+            <div class="ps-status-icon" id="step-3-icon"></div>
+          </div>
+          <div class="ps-step" id="step-4" data-step="4">
+            <div class="ps-step-left">
+              <div class="ps-circle"><span>4</span></div>
+              <div class="ps-line"></div>
+            </div>
+            <div class="ps-info">
+              <div class="ps-name">AI Video Rendering</div>
+              <div class="ps-desc">Kling · Pixverse · HappyHorse render clips</div>
+            </div>
+            <div class="ps-status-icon" id="step-4-icon"></div>
+          </div>
+          <div class="ps-step" id="step-5" data-step="5">
+            <div class="ps-step-left">
+              <div class="ps-circle"><span>5</span></div>
+              <div class="ps-line"></div>
+            </div>
+            <div class="ps-info">
+              <div class="ps-name">Assembly & Sound Mixing</div>
+              <div class="ps-desc">MoviePy merges clips, audio & 22-track background music</div>
+            </div>
+            <div class="ps-status-icon" id="step-5-icon"></div>
+          </div>
+          <div class="ps-step" id="step-6" data-step="6">
+            <div class="ps-step-left">
+              <div class="ps-circle"><span>6</span></div>
+              <div class="ps-line"></div>
+            </div>
+            <div class="ps-info">
+              <div class="ps-name">Viral Thumbnail Generation</div>
+              <div class="ps-desc" id="step-6-desc">Generates high-converting 9:16 vertical thumbnail with bold typography</div>
+            </div>
+            <div class="ps-status-icon" id="step-6-icon"></div>
+          </div>
+          <div class="ps-step" id="step-7" data-step="7">
+            <div class="ps-step-left">
+              <div class="ps-circle"><span>7</span></div>
+            </div>
+            <div class="ps-info">
+              <div class="ps-name">YouTube Auto-Upload</div>
+              <div class="ps-desc" id="step-7-desc">Uploads video & custom thumbnail directly to YouTube channel as a Private Draft</div>
+            </div>
+            <div class="ps-status-icon" id="step-7-icon"></div>
+          </div>
+        </div>
+
+        <!-- Terminal Log -->
+        <div class="terminal" id="terminal">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="terminal-title">pipeline.log</span>
+            <span class="terminal-tag">LIVE</span>
+          </div>
+          <div class="terminal-body" id="terminal-body">
+            <p class="terminal-line dim">Waiting for live data stream...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result Preview -->
+      <div class="result-card" id="result-preview" style="display:none;">
+        <div class="result-card-header">
+          <div class="result-card-title">
+            <span>✅</span> Video & Thumbnail Ready
+          </div>
+          <span class="result-review-tag" id="result-upload-status-tag">Uploaded to YouTube (Private Draft)</span>
+        </div>
+        <div class="result-card-body">
+          <div class="result-media-grid">
+            <div class="result-media-col">
+              <div class="result-media-badge">🎬 Final 9:16 Video</div>
+              <div class="result-video-wrap">
+                <video id="result-video" controls class="result-video"></video>
+              </div>
+            </div>
+            <div class="result-media-col">
+              <div class="result-media-badge">🖼️ YouTube Thumbnail (Auto-Attached)</div>
+              <div class="result-thumb-wrap">
+                <img id="result-thumbnail" src="" alt="YouTube Thumbnail" class="result-thumb-img" />
+              </div>
+            </div>
+          </div>
+          <div class="result-meta">
+            <div class="meta-row" id="yt-link-row" style="display:none;">
+              <span class="meta-label">YouTube Link</span>
+              <span class="meta-value"><a id="result-yt-link" href="#" target="_blank" style="color:var(--accent-red); font-weight:700; text-decoration:underline;">Open Private Draft on YouTube ↗</a></span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Title</span>
+              <span class="meta-value" id="result-title"></span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Description</span>
+              <span class="meta-value small" id="result-desc"></span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Tags</span>
+              <div class="tags-row" id="result-tags"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════ GALLERY TAB ══════════ -->
+    <section class="tab-content" id="tab-gallery">
+      <div class="hero hero--sm">
+        <div class="hero-eyebrow">🎞 Your Content Library</div>
+        <h1 class="hero-title">Video <span class="gradient-text">Vault</span></h1>
+        <p class="hero-sub">All previously generated videos, ready to play and review</p>
+      </div>
+      <div class="gallery-grid" id="gallery-grid"></div>
+      <div class="gallery-empty" id="gallery-empty" style="display:none">
+        <div class="empty-icon">📂</div>
+        <p class="empty-title">No videos yet</p>
+        <p class="empty-sub">Head over to the Studio tab and generate your first video!</p>
+      </div>
+    </section>
+
+    <!-- ══════════ CREDITS TAB ══════════ -->
+    <section class="tab-content" id="tab-credits">
+      <div class="hero hero--sm">
+        <div class="hero-eyebrow">📊 Resource Monitor</div>
+        <h1 class="hero-title">API <span class="gradient-text">Credits</span></h1>
+        <p class="hero-sub">All your free-tier API providers — limits reset daily at midnight</p>
+      </div>
+
+      <div class="credits-stats">
+        <div class="stat-item">
+          <span class="stat-value" id="total-daily-clips">~18</span>
+          <span class="stat-label">Max clips/day</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value" id="total-videos">~3–4</span>
+          <span class="stat-label">Full videos/day</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value">∞</span>
+          <span class="stat-label">Audio clips (TTS)</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value">1,000+</span>
+          <span class="stat-label">Script requests/day</span>
+        </div>
+      </div>
+
+      <div class="credits-grid">
+        <div class="credit-card">
+          <div class="cc-header">
+            <div class="cc-icon" style="background: linear-gradient(135deg,#8b5cf6,#ec4899)">🎬</div>
+            <div class="cc-info">
+              <div class="cc-name">Kling AI</div>
+              <div class="cc-type">Text-to-Video</div>
+            </div>
+            <span class="cc-badge cc-badge--daily">↻ Daily</span>
+          </div>
+          <div class="cc-bar-wrap">
+            <div class="cc-bar-label"><span>Daily Free Credits</span><span class="cc-fraction">66 credits</span></div>
+            <div class="cc-bar"><div class="cc-fill" style="width:0%;background:linear-gradient(90deg,#8b5cf6,#ec4899)"></div></div>
+          </div>
+          <div class="cc-facts">
+            <div class="cc-fact"><span>⏱</span> 10 credits per 5-second clip</div>
+            <div class="cc-fact"><span>🎞</span> ~6 free clips per day</div>
+            <div class="cc-fact"><span>📺</span> 720p, 9:16 portrait</div>
+          </div>
+          <div class="cc-footer">
+            <span class="cc-status cc-status--active">✓ Active</span>
+            <a href="https://klingai.com" target="_blank" class="cc-link">Dashboard ↗</a>
+          </div>
+        </div>
+
+        <div class="credit-card">
+          <div class="cc-header">
+            <div class="cc-icon" style="background: linear-gradient(135deg,#0ea5e9,#8b5cf6)">🌀</div>
+            <div class="cc-info">
+              <div class="cc-name">Pixverse</div>
+              <div class="cc-type">Text-to-Video</div>
+            </div>
+            <span class="cc-badge cc-badge--daily">↻ Daily</span>
+          </div>
+          <div class="cc-bar-wrap">
+            <div class="cc-bar-label"><span>Daily Free Credits</span><span class="cc-fraction">~6 clips</span></div>
+            <div class="cc-bar"><div class="cc-fill" style="width:0%;background:linear-gradient(90deg,#0ea5e9,#8b5cf6)"></div></div>
+          </div>
+          <div class="cc-facts">
+            <div class="cc-fact"><span>⏱</span> ~1 credit per 5-second clip</div>
+            <div class="cc-fact"><span>🎞</span> ~6 free clips per day</div>
+            <div class="cc-fact"><span>📺</span> Up to 1080p, 9:16 portrait</div>
+          </div>
+          <div class="cc-footer">
+            <span class="cc-status cc-status--active">✓ Active</span>
+            <a href="https://pixverse.ai" target="_blank" class="cc-link">Dashboard ↗</a>
+          </div>
+        </div>
+
+        <div class="credit-card">
+          <div class="cc-header">
+            <div class="cc-icon" style="background: linear-gradient(135deg,#f59e0b,#f43f5e)">🐴</div>
+            <div class="cc-info">
+              <div class="cc-name">HappyHorse (Alibaba)</div>
+              <div class="cc-type">Text-to-Video</div>
+            </div>
+            <span class="cc-badge cc-badge--trial">🎁 Trial</span>
+          </div>
+          <div class="cc-bar-wrap">
+            <div class="cc-bar-label"><span>Trial Credits</span><span class="cc-fraction">~6 clips</span></div>
+            <div class="cc-bar"><div class="cc-fill" style="width:0%;background:linear-gradient(90deg,#f59e0b,#f43f5e)"></div></div>
+          </div>
+          <div class="cc-facts">
+            <div class="cc-fact"><span>⏱</span> Credits based on render seconds</div>
+            <div class="cc-fact"><span>🎞</span> Generous trial on new accounts</div>
+            <div class="cc-fact"><span>⚠️</span> Trial may not renew daily</div>
+          </div>
+          <div class="cc-footer">
+            <span class="cc-status cc-status--active">✓ Active</span>
+            <a href="https://dashscope.aliyuncs.com" target="_blank" class="cc-link">Dashboard ↗</a>
+          </div>
+        </div>
+
+        <div class="credit-card">
+          <div class="cc-header">
+            <div class="cc-icon" style="background: linear-gradient(135deg,#10b981,#0ea5e9)">✍️</div>
+            <div class="cc-info">
+              <div class="cc-name">Groq — Script AI</div>
+              <div class="cc-type">Script & Content Generation</div>
+            </div>
+            <span class="cc-badge cc-badge--daily">↻ Daily</span>
+          </div>
+          <div class="cc-bar-wrap">
+            <div class="cc-bar-label"><span>Daily Requests</span><span class="cc-fraction">~1,000 req</span></div>
+            <div class="cc-bar"><div class="cc-fill" style="width:3%;background:linear-gradient(90deg,#10b981,#0ea5e9)"></div></div>
+          </div>
+          <div class="cc-facts">
+            <div class="cc-fact"><span>⚡</span> 30 requests/minute free tier</div>
+            <div class="cc-fact"><span>📝</span> 1 script = 1 request (ultra cheap)</div>
+            <div class="cc-fact"><span>🧠</span> 131K context window</div>
+          </div>
+          <div class="cc-footer">
+            <span class="cc-status cc-status--active">✓ Active</span>
+            <a href="https://console.groq.com" target="_blank" class="cc-link">Console ↗</a>
+          </div>
+        </div>
+
+        <div class="credit-card">
+          <div class="cc-header">
+            <div class="cc-icon" style="background: linear-gradient(135deg,#3b82f6,#0ea5e9)">🎙️</div>
+            <div class="cc-info">
+              <div class="cc-name">Azure Neural TTS</div>
+              <div class="cc-type">Voiceover — edge-tts</div>
+            </div>
+            <span class="cc-badge cc-badge--unlimited">∞ Free</span>
+          </div>
+          <div class="cc-bar-wrap">
+            <div class="cc-bar-label"><span>Usage</span><span class="cc-fraction">Unlimited</span></div>
+            <div class="cc-bar"><div class="cc-fill" style="width:100%;background:linear-gradient(90deg,#3b82f6,#0ea5e9)"></div></div>
+          </div>
+          <div class="cc-facts">
+            <div class="cc-fact"><span>🆓</span> 100% free, no API key</div>
+            <div class="cc-fact"><span>🌍</span> 400+ voices in 140+ languages</div>
+            <div class="cc-fact"><span>✅</span> No rate limits</div>
+          </div>
+          <div class="cc-footer">
+            <span class="cc-status cc-status--active">✓ Built-in</span>
+            <span class="cc-link" style="opacity:0.4;cursor:default">Included</span>
+          </div>
+        </div>
+
+        <div class="credit-card">
+          <div class="cc-header">
+            <div class="cc-icon" style="background: linear-gradient(135deg,#f43f5e,#f59e0b)">📺</div>
+            <div class="cc-info">
+              <div class="cc-name">YouTube Data API v3</div>
+              <div class="cc-type">Video Upload (Private Draft)</div>
+            </div>
+            <span class="cc-badge cc-badge--daily">↻ Daily</span>
+          </div>
+          <div class="cc-bar-wrap">
+            <div class="cc-bar-label"><span>Upload Quota</span><span class="cc-fraction">10,000 units</span></div>
+            <div class="cc-bar"><div class="cc-fill" style="width:1%;background:linear-gradient(90deg,#f43f5e,#f59e0b)"></div></div>
+          </div>
+          <div class="cc-facts">
+            <div class="cc-fact"><span>📤</span> 1 upload costs ~1,600 units</div>
+            <div class="cc-fact"><span>🎞</span> ~6 uploads per day free</div>
+            <div class="cc-fact"><span>🔒</span> All videos uploaded as Private</div>
+          </div>
+          <div class="cc-footer">
+            <span class="cc-status cc-status--active">✓ Active</span>
+            <a href="https://console.cloud.google.com" target="_blank" class="cc-link">Console ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-banner">
+        <span class="info-banner-icon">📁</span>
+        <div>
+          <strong>Where are my videos?</strong> Every video is saved locally to <code>./output/</code> inside your project folder. You can view and play them in the <strong>Gallery</strong> tab.
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════ SETTINGS TAB ══════════ -->
+    <section class="tab-content" id="tab-settings">
+      <div class="hero hero--sm">
+        <div class="hero-eyebrow">⚙️ Configuration</div>
+        <h1 class="hero-title">Dynamic <span class="gradient-text">Settings</span></h1>
+        <p class="hero-sub">Update API keys and credentials at runtime — no server restart needed</p>
+      </div>
+
+      <div class="settings-grid">
+
+        <div class="settings-card">
+          <div class="sc-header">
+            <div class="sc-icon sc-icon--green">🔑</div>
+            <div>
+              <div class="sc-title">Groq API Key</div>
+              <div class="sc-sub">Rotate keys without restarting</div>
+            </div>
+          </div>
+          <p class="sc-desc">Add a new Groq API key to dynamically append to the fallback rotation pool. Useful when a key expires or hits its daily limit.</p>
+          <input type="password" id="input-groq-key" class="sc-input" placeholder="gsk_..." autocomplete="off" />
+          <button id="btn-save-groq" class="btn-primary btn-glow-green">
+            <span>🔑</span> Save Groq Key
+          </button>
+          <div class="status-msg" id="status-groq"></div>
+        </div>
+
+        <div class="settings-card settings-card--wide">
+          <div class="sc-header">
+            <div class="sc-icon sc-icon--red">📺</div>
+            <div>
+              <div class="sc-title">YouTube Channel Profiles</div>
+              <div class="sc-sub">Choose ONE active channel at a time for uploads</div>
+            </div>
+          </div>
+          <p class="sc-desc">Upload credentials for your YouTube channels. Each channel project (with its <code>client_secret</code> and authorized <code>token</code>) is grouped as a single <strong>Channel Profile</strong> below. Select which channel is currently active with one click.</p>
+          
+          <div class="cred-upload-row">
+            <label class="file-upload-label" for="input-youtube-json" style="margin-bottom:0; flex:1;">
+              <span class="file-upload-icon">📎</span>
+              <span id="file-label-text">Choose OAuth client_secret.json or token.json...</span>
+              <input type="file" id="input-youtube-json" accept=".json" style="display:none;" onchange="document.getElementById('file-label-text').textContent = this.files[0]?.name || 'Choose file...'" />
+            </label>
+            <button id="btn-save-youtube" class="btn-primary btn-glow-red" style="white-space: nowrap;">
+              <span>📺</span> Add Channel File
+            </button>
+          </div>
+          <div class="status-msg" id="status-youtube"></div>
+
+          <!-- One-Time Google Authorization Banner (shown when active channel needs token) -->
+          <div class="auth-action-banner" id="auth-action-banner" style="display: none;">
+            <div class="auth-banner-left">
+              <div class="auth-banner-icon">🔐</div>
+              <div class="auth-banner-text">
+                <div class="auth-banner-title">One-Time Google Sign-In Required</div>
+                <div class="auth-banner-desc">
+                  Your active channel needs Google authorization. Click the button to sign in with your Google account in your browser so Google can authorize your YouTube channel and generate your <code style="color:#34d399;">token.json</code>.
+                </div>
+              </div>
+            </div>
+            <button id="btn-authenticate-google" class="btn-auth-google">
+              <span>🔑</span> Sign In with Google
+            </button>
+          </div>
+
+          <!-- Stored Credentials List -->
+          <div class="cred-list-wrap">
+            <div class="cred-list-header">
+              <span class="cred-list-title">🎛️ Channel Profiles (Choose 1 Active Channel)</span>
+              <span class="cred-count-badge" id="cred-count-badge">Loading...</span>
+            </div>
+            <div class="cred-list" id="cred-list">
+              <div class="cred-empty">Loading channel profiles...</div>
+            </div>
+          </div>
+
+          <div class="sc-help-text" style="font-size: 0.85rem; color: var(--text-muted); background: var(--bg-hover); padding: 14px; border-radius: 8px; margin-top: 16px; border: 1px solid var(--border);">
+            <strong style="color: var(--text); font-size: 0.9rem;">💡 How Single-Channel Selection Works:</strong>
+            <ul style="margin: 8px 0 0 18px; padding: 0; line-height: 1.6;">
+              <li><strong>Only 1 Active Channel at a time:</strong> The system automatically pairs the channel's <code>client_secret.json</code> and <code>token.json</code> together.</li>
+              <li><strong>Switching Channels:</strong> Click <strong>"⚡ Switch to this Channel"</strong>. If the channel is already authorized, it connects instantly with zero extra setup.</li>
+              <li><strong>First-Time Setup for a new channel:</strong> Click Switch to that channel, then click <strong>"🔑 Sign In with Google"</strong> once. Its token is permanently saved for that channel.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/app.js?v=9"></script>
+</body>
+</html>

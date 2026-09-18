@@ -20,7 +20,7 @@ brief in this pipeline - uses only a small fraction of the daily allowance.
 import os
 import pickle
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google_auth_oauthlib.flow import Flow, InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -114,22 +114,86 @@ def get_authenticated_service(force_interactive: bool = False):
                 creds = None
 
         if not creds or not creds.valid or force_interactive:
-            if not os.path.exists(YT_CLIENT_SECRETS_FILE):
-                raise FileNotFoundError(f"Missing '{YT_CLIENT_SECRETS_FILE}'. Please upload your Google OAuth client secret in Settings.")
-
-            # Interactive step - run with the active client_secret.json!
-            flow = InstalledAppFlow.from_client_secrets_file(YT_CLIENT_SECRETS_FILE, YT_SCOPES)
-            creds = flow.run_local_server(
-                host="localhost",
-                port=0,
-                authorization_prompt_message="AUTH_URL_START: {url} :AUTH_URL_END",
-                success_message="Authentication successful! Your YouTube channel is now connected. You can close this tab now.",
-                open_browser=True
-            )
-            with open(YT_TOKEN_FILE, "w") as token_file:
-                token_file.write(creds.to_json())
+            # ── Headless / cloud path (Render, etc.) ──────────────────────────
+            # If there's no browser available, we can't run InstalledAppFlow.
+            # Instead, read the token from the YT_TOKEN_JSON environment variable
+            # (paste the contents of your local token.json into Render's env vars).
+            yt_token_json_env = os.environ.get("YT_TOKEN_JSON", "").strip()
+            if yt_token_json_env:
+                with open(YT_TOKEN_FILE, "w", encoding="utf-8") as f:
+                    f.write(yt_token_json_env)
+                try:
+                    creds = Credentials.from_authorized_user_file(YT_TOKEN_FILE, YT_SCOPES)
+                    if creds and creds.expired and creds.refresh_token:
+                        creds.refresh(Request())
+                        with open(YT_TOKEN_FILE, "w") as tf:
+                            tf.write(creds.to_json())
+                except Exception as e:
+                    raise RuntimeError(f"YT_TOKEN_JSON env var is invalid: {e}")
+            else:
+                # ── Local / interactive path ───────────────────────────────────
+                if not os.path.exists(YT_CLIENT_SECRETS_FILE):
+                    raise FileNotFoundError(
+                        f"Missing '{YT_CLIENT_SECRETS_FILE}'. "
+                        "Please upload your Google OAuth client secret in Settings."
+                    )
+                try:
+                    flow = InstalledAppFlow.from_client_secrets_file(YT_CLIENT_SECRETS_FILE, YT_SCOPES)
+                    creds = flow.run_local_server(
+                        host="localhost",
+                        port=0,
+                        authorization_prompt_message="AUTH_URL_START: {url} :AUTH_URL_END",
+                        success_message="Authentication successful! You can close this tab.",
+                        open_browser=True,
+                    )
+                except Exception:
+                    # Fallback: raise a clear error telling the user what to do on Render
+                    raise RuntimeError(
+                        "YouTube credentials are missing or expired. "
+                        "On Render: paste the contents of your local token.json "
+                        "into the YT_TOKEN_JSON environment variable in the Render dashboard."
+                    )
+                with open(YT_TOKEN_FILE, "w") as token_file:
+                    token_file.write(creds.to_json())
 
     return build("youtube", "v3", credentials=creds)
+
+
+def get_auth_url() -> str:
+    """
+    Returns the Google OAuth consent URL for headless / cloud deployments.
+    The user visits this URL, approves access, and gets an authorization code
+    which they paste back via complete_auth().
+    """
+    if not os.path.exists(YT_CLIENT_SECRETS_FILE):
+        raise FileNotFoundError(f"Missing '{YT_CLIENT_SECRETS_FILE}'.")
+    flow = Flow.from_client_secrets_file(
+        YT_CLIENT_SECRETS_FILE,
+        scopes=YT_SCOPES,
+        redirect_uri="urn:ietf:wg:oauth:2.0:oob",
+    )
+    auth_url, _ = flow.authorization_url(prompt="consent", access_type="offline")
+    return auth_url
+
+
+def complete_auth(code: str):
+    """
+    Exchanges the authorization code (pasted by the user) for credentials
+    and saves them to token.json.
+    """
+    import json
+    if not os.path.exists(YT_CLIENT_SECRETS_FILE):
+        raise FileNotFoundError(f"Missing '{YT_CLIENT_SECRETS_FILE}'.")
+    flow = Flow.from_client_secrets_file(
+        YT_CLIENT_SECRETS_FILE,
+        scopes=YT_SCOPES,
+        redirect_uri="urn:ietf:wg:oauth:2.0:oob",
+    )
+    flow.fetch_token(code=code)
+    creds = flow.credentials
+    with open(YT_TOKEN_FILE, "w") as token_file:
+        token_file.write(creds.to_json())
+    return creds
 
 
 def upload_video(video_path: str, title: str, description: str, tags: list[str],

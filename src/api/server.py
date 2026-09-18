@@ -207,46 +207,29 @@ async def run_pipeline_once(topic: str = None, manual_story: str = None, upload_
             "message": "✅ Step 5/7: Video assembly & sound mix complete!"
         })
 
-        # ── STEP 6: Viral Thumbnail Generation ─────────────────────────────
-        from src.services.thumbnail import generate_thumbnail
-        thumb_path = f"{OUTPUT_DIR}/thumb_{run_id}.jpg"
-        thumb_url = f"/videos/thumb_{run_id}.jpg"
+        # ── STEP 6: YouTube Upload (Automatic) ─────────────────────────────
         await broadcast("progress", {
-            "step": 6, "total": 7, "status": "running",
-            "message": "🖼️ Step 6/7: Generating high-converting 9:16 vertical YouTube thumbnail..."
-        })
-        await loop.run_in_executor(None, generate_thumbnail, content["title"], thumb_path)
-
-        await broadcast("progress", {
-            "step": 6, "total": 7, "status": "done",
-            "message": "✅ Step 6/7: Viral thumbnail created & ready for YouTube!",
-            "thumbnail_url": thumb_url
-        })
-
-        # ── STEP 7: YouTube Upload (Automatic) ─────────────────────────────
-        await broadcast("progress", {
-            "step": 7, "total": 7, "status": "running",
-            "message": "📤 Step 7/7: Uploading video & custom thumbnail directly to YouTube as a Private Draft..."
+            "step": 6, "total": 6, "status": "running",
+            "message": "📤 Step 6/6: Uploading video directly to YouTube as a Private Draft..."
         })
         yt_video_id = None
         try:
             yt_video_id = await loop.run_in_executor(
-                None, upload_video, final_path, content["title"], content["description"], content["tags"], "27", "private", thumb_path
+                None, upload_video, final_path, content["title"], content["description"], content["tags"], "27", "private"
             )
-            upload_msg = f"✅ Video and Thumbnail uploaded directly to YouTube! (ID: {yt_video_id})"
+            upload_msg = f"✅ Video uploaded directly to YouTube! (ID: {yt_video_id})"
         except Exception as e:
             print(f"YouTube Upload Error: {e}")
             traceback.print_exc()
-            upload_msg = f"⚠️ Video and thumbnail ready locally, but YouTube upload failed: {str(e)}"
+            upload_msg = f"⚠️ Video ready locally, but YouTube upload failed: {str(e)}"
 
         video_filename = f"final_{run_id}.mp4"
         await broadcast("complete", {
-            "step": 7, "total": 7, "status": "done",
+            "step": 6, "total": 6, "status": "done",
             "message": upload_msg,
             "video": {
                 "filename": video_filename,
                 "url": f"/videos/{video_filename}",
-                "thumbnail_url": thumb_url,
                 "youtube_id": yt_video_id,
                 "youtube_url": f"https://youtube.com/watch?v={yt_video_id}" if yt_video_id else None,
                 "title": content["title"],
@@ -836,7 +819,7 @@ async def get_gallery():
         videos.append({
             "filename": f.name,
             "url": f"/videos/{f.name}",
-            "thumbnail_url": thumb_url,
+            "thumbnail_url": None,
             "created_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stat.st_mtime)),
             "size_mb": round(stat.st_size / (1024 * 1024), 2)
         })

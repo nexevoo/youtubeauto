@@ -637,28 +637,12 @@ def build_composite_background_music(final_duration: float, topic: str = "", mus
     return comp.subclip(0, final_duration)
 
 
-def assemble_video(scenes: list[dict], audio_paths: list[str], video_clip_paths: list[str], out_path: str, topic: str = "", thumbnail_path: str = None, music_preference: str = "all") -> str:
+def assemble_video(scenes: list[dict], audio_paths: list[str], video_clip_paths: list[str], out_path: str, topic: str = "", music_preference: str = "all") -> str:
     scene_clips = [
         build_scene_clip(v, a, s["narration"])
         for s, a, v in zip(scenes, audio_paths, video_clip_paths)
     ]
     
-    if thumbnail_path and os.path.exists(thumbnail_path):
-        from moviepy.editor import ImageClip
-        from moviepy.audio.AudioClip import AudioClip
-        # Insert a 0.1s frame of the thumbnail at the start, properly resized and cropped
-        # to ensure it strictly adheres to the 9:16 aspect ratio (1080x1920) without black bars.
-        thumb_clip = (
-            ImageClip(thumbnail_path)
-            .set_duration(0.1)
-            .resize(height=1920)
-            .fx(vfx.crop, width=1080, height=1920, x_center=None, y_center=None)
-        )
-        # Add a silent audio clip so it doesn't break concatenation with audio-having clips
-        silent_audio = AudioClip(lambda t: [0, 0], duration=0.1, fps=44100)
-        thumb_clip = thumb_clip.set_audio(silent_audio)
-        scene_clips.insert(0, thumb_clip)
-
     final = concatenate_videoclips(scene_clips, method="compose")
 
     # Dynamically blend background music from the full 22-track library

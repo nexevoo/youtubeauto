@@ -9,7 +9,6 @@ from src.services.content import generate_daily_content
 from src.services.tts import text_to_speech
 from src.services.video import generate_ai_video, assemble_video
 from src.services.youtube import upload_video
-from src.services.thumbnail import generate_thumbnail
 
 
 def run_daily_job():
@@ -41,13 +40,10 @@ def run_daily_job():
                 generate_ai_video(prompt, save_path=path)
                 video_clip_paths.append(path)
 
-            print("3.5/4 Generating Thumbnail (to flash at start of video)...")
-            thumbnail_path = f"{OUTPUT_DIR}/thumb_{run_id}.jpg"
-            generate_thumbnail(content["title"], thumbnail_path)
 
             print("4/4 Assembling Video...")
             final_path = f"{OUTPUT_DIR}/final_{run_id}.mp4"
-            assemble_video(scenes, audio_paths, video_clip_paths, final_path, topic=topic, thumbnail_path=thumbnail_path)
+            assemble_video(scenes, audio_paths, video_clip_paths, final_path, topic=topic)
 
             print("5/4 Uploading to YouTube...")
             upload_video(
@@ -56,7 +52,6 @@ def run_daily_job():
                 description=content["description"],
                 tags=content["tags"],
                 privacy_status="private",  # Keeps them in draft/private state
-                thumbnail_path=thumbnail_path
             )
             print(f"Successfully finished processing topic: {topic}")
             

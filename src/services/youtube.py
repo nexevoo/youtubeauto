@@ -54,12 +54,25 @@ def get_token_client_id() -> str | None:
         return None
 
 
+def _sync_token_from_env():
+    """Restores token.json from YT_TOKEN_JSON environment variable if the file is missing."""
+    if not os.path.exists(YT_TOKEN_FILE):
+        yt_token_json_env = os.environ.get("YT_TOKEN_JSON", "").strip()
+        if yt_token_json_env:
+            try:
+                with open(YT_TOKEN_FILE, "w", encoding="utf-8") as f:
+                    f.write(yt_token_json_env)
+            except Exception:
+                pass
+
+
 def verify_youtube_connection() -> tuple[bool, str]:
     """
     Checks if YouTube credentials exist, are valid (or refreshable), and match the active client_secret.
     Does NOT trigger interactive login.
     Returns (True, "YouTube connection active") or (False, "Error message").
     """
+    _sync_token_from_env()
     if not os.path.exists(YT_TOKEN_FILE):
         return False, "YouTube token.json not found. Please authenticate YouTube in Settings first."
 
@@ -78,7 +91,7 @@ def verify_youtube_connection() -> tuple[bool, str]:
         if not creds.valid:
             if creds.expired and creds.refresh_token:
                 creds.refresh(Request())
-                with open(YT_TOKEN_FILE, "w") as token_file:
+                with open(YT_TOKEN_FILE, "w", encoding="utf-8") as token_file:
                     token_file.write(creds.to_json())
             else:
                 return False, "YouTube credentials are expired and cannot be refreshed. Please re-authenticate in Settings."
@@ -94,6 +107,7 @@ def get_authenticated_service(force_interactive: bool = False):
     Guarantees the token matches the active client_secret.json.
     If force_interactive is True, always runs the interactive OAuth consent flow in the browser.
     """
+    _sync_token_from_env()
     creds = None
     secret_cid = get_secret_client_id()
 
@@ -110,6 +124,8 @@ def get_authenticated_service(force_interactive: bool = False):
         if creds and creds.expired and creds.refresh_token and not force_interactive:
             try:
                 creds.refresh(Request())  # silent, no browser - this is the daily-run path
+                with open(YT_TOKEN_FILE, "w", encoding="utf-8") as tf:
+                    tf.write(creds.to_json())
             except Exception:
                 creds = None
 
@@ -126,7 +142,7 @@ def get_authenticated_service(force_interactive: bool = False):
                     creds = Credentials.from_authorized_user_file(YT_TOKEN_FILE, YT_SCOPES)
                     if creds and creds.expired and creds.refresh_token:
                         creds.refresh(Request())
-                        with open(YT_TOKEN_FILE, "w") as tf:
+                        with open(YT_TOKEN_FILE, "w", encoding="utf-8") as tf:
                             tf.write(creds.to_json())
                 except Exception as e:
                     raise RuntimeError(f"YT_TOKEN_JSON env var is invalid: {e}")
